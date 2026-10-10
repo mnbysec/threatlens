@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ThreatLens — Vulnerability & Advisory Intelligence</title>
+  <meta name="description" content="ThreatLens aggregates CVE and vendor advisories from NVD, CISA KEV, GitHub and Ubuntu into one date-filtered, severity-ranked feed — and notifies you when your bookmarked stack is affected." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23059669'/%3E%3Cpath d='M6 22V8m0 14h14M6 8l5 8 4-5 5 7' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="static/css/style.css" />
+</head>
+<body>
+
+  <!-- ============================ HEADER ============================ -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="logo" href="/">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#059669"/><path d="M6 22V8m0 14h14M6 8l5 8 4-5 5 7" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <span>ThreatLens</span>
+      </a>
+      <div class="nav-right">
+        <span class="status-chip queued" id="statusChip">STANDBY</span>
+        <a href="https://github.com/mnbysec/threatlens" target="_blank" rel="noopener" class="gh-link">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.11.82-.26.82-.57v-2.23c-3.34.73-4.04-1.42-4.04-1.42a3.18 3.18 0 0 0-1.33-1.76c-1.09-.74.08-.73.08-.73a2.52 2.52 0 0 1 1.84 1.24 2.56 2.56 0 0 0 3.5 1 2.56 2.56 0 0 1 .76-1.6c-2.67-.3-5.47-1.34-5.47-5.95a4.65 4.65 0 0 1 1.24-3.23 4.33 4.33 0 0 1 .12-3.18s1-.33 3.3 1.23a11.4 11.4 0 0 1 6.01 0c2.3-1.56 3.3-1.23 3.3-1.23a4.33 4.33 0 0 1 .11 3.18 4.65 4.65 0 0 1 1.24 3.23c0 4.62-2.81 5.64-5.49 5.94a2.87 2.87 0 0 1 .82 2.23v3.29c0 .32.21.69.83.57A12 12 0 0 0 12 .3"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================ HERO ============================ -->
+  <header class="hero">
+    <div class="container">
+      <span class="tag"><span class="dot"></span> Open Source · ThreatLens v1.0</span>
+      <h1>Stop reading every CVE. <span class="grad">Read only yours.</span></h1>
+      <p class="lead">
+        ThreatLens pulls advisories from NVD, CISA KEV, GitHub and Ubuntu, ranks them by severity,
+        and lets you pick any date to see exactly what was disclosed. Bookmark the tech you run and
+        get a Slack webhook the moment a new CVE or advisory matches your stack.
+      </p>
+    </div>
+  </header>
+
+  <!-- ============================ CONSOLE ============================ -->
+  <section id="console">
+    <div class="container">
+      <div class="console">
+        <div class="console-bar">
+          <span class="cdot" style="background:#f87171"></span>
+          <span class="cdot" style="background:#fbbf24"></span>
+          <span class="cdot" style="background:#34d399"></span>
+          <span class="bar-title">threatlens :: advisory intelligence</span>
+          <span class="svr" id="svrState" title="Backend server status"><span class="svr-dot"></span><span id="svrText">offline</span></span>
+        </div>
+
+        <div class="console-body">
+          <!-- controls -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Advisory feed</h3>
+              <span class="card-sub" id="tlFeedMeta">—</span>
+            </div>
+            <div class="tl-controls">
+              <div class="tl-date-field">
+                <label for="tlDate">Date</label>
+                <input type="date" id="tlDate" />
+              </div>
+              <button class="btn ghost icon-btn" id="tlRefresh" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6"/></svg>
+                Refresh
+              </button>
+              <div class="search-box" style="flex:1; min-width:200px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                <input type="text" id="tlSearch" placeholder="Search CVE, title or product…" />
+              </div>
+              <label class="checkbox" style="white-space:nowrap;"><input type="checkbox" id="tlAssetsOnly" disabled /> Only my assets</label>
+            </div>
+          </div>
+
+          <!-- dashboard -->
+          <div class="dash" id="tlDash"></div>
+
+          <!-- charts -->
+          <div class="tl-charts">
+            <div class="card chart-card">
+              <h4>Severity distribution</h4>
+              <div class="donut-wrap"><svg id="tlDonut" viewBox="0 0 140 140" width="150" height="150"></svg><div class="donut-center" id="tlDonutCenter"></div></div>
+              <div class="legend" id="tlDonutLegend"></div>
+            </div>
+            <div class="card chart-card">
+              <h4>Sources</h4>
+              <div id="tlSourceBars"></div>
+            </div>
+            <div class="card chart-card">
+              <h4>Last 7 days</h4>
+              <div class="trend" id="tlTrend"></div>
+            </div>
+          </div>
+
+          <!-- severity filter chips -->
+          <div class="filters" id="tlFilters">
+            <span class="fchip active" data-filter="all">All</span>
+            <span class="fchip" data-filter="critical">Critical</span>
+            <span class="fchip" data-filter="high">High</span>
+            <span class="fchip" data-filter="medium">Medium</span>
+            <span class="fchip" data-filter="low">Low</span>
+            <span class="fchip" data-filter="none">Unrated</span>
+          </div>
+          <div id="tlFeed">
+            <div class="empty"><b>Loading…</b></div>
+          </div>
+
+          <!-- news -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Security news</h3>
+              <span class="card-sub">Hacker News · The Hacker News · BleepingComputer · Krebs on Security</span>
+            </div>
+            <div class="news-grid" id="tlNews"></div>
+          </div>
+
+          <!-- assets / SBOM -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Your asset lists</h3>
+              <span class="card-sub">Multiple lists — SBOMs, manual lists and API integrations</span>
+            </div>
+
+            <div class="tl-sources" id="tlSources"></div>
+
+            <div class="tabs" id="tlAddTabs">
+              <button type="button" class="active" data-add="sbom">Upload SBOM</button>
+              <button type="button" data-add="manual">Paste names</button>
+              <button type="button" data-add="api">Connect API</button>
+            </div>
+
+            <div class="add-pane" id="tlAddSbom">
+              <div class="drop-zone" id="tlSbomDrop">
+                <b>Drop your SBOM here</b> or click to browse<br />
+                <span style="color:#475569;font-size:12px">.txt · .csv · .xlsx · CycloneDX / SPDX .json</span>
+                <input type="file" id="tlSbomFile" accept=".txt,.csv,.xlsx,.xlsm,.json" style="display:none;" />
+              </div>
+              <div style="margin-top:10px;font-size:12.5px;color:#64748b;">No file handy?
+                <button type="button" class="btn ghost btn-sm" id="tlSampleLoad" style="margin-left:6px;">Load sample data</button>
+                <span style="color:#475569;">(18 packages, instant)</span>
+              </div>
+            </div>
+
+            <div class="add-pane" id="tlAddManual" style="display:none;">
+              <div class="grid2" style="margin-bottom:10px;">
+                <label>List name<input class="field" id="tlListName" type="text" placeholder="e.g. Production backend" /></label>
+              </div>
+              <textarea id="tlPasteNames" placeholder="One package per line:&#10;nginx@1.24&#10;log4j-core==2.14.1&#10;redis"></textarea>
+              <button class="btn ghost" id="tlManualAdd" type="button" style="margin-top:10px;">Add list</button>
+            </div>
+
+            <div class="add-pane" id="tlAddApi" style="display:none;">
+              <div class="grid2">
+                <label>Provider
+                  <select class="field" id="tlApiProvider">
+                    <option value="crowdstrike">CrowdStrike Falcon</option>
+                    <option value="splunk">Splunk</option>
+                    <option value="defender">Microsoft Defender XDR</option>
+                    <option value="elastic">Elastic Fleet</option>
+                    <option value="wazuh">Wazuh</option>
+                    <option value="sentinelone">SentinelOne</option>
+                    <option value="tenable">Tenable.io</option>
+                    <option value="generic">Generic HTTP API</option>
+                  </select>
+                </label>
+                <label>List name<input class="field" id="tlApiName" type="text" placeholder="CrowdStrike inventory" /></label>
+                <label class="full">Base URL<input class="field" id="tlApiBase" type="text" placeholder="https://api.crowdstrike.com" /></label>
+                <label class="full tl-api-custom">Asset endpoint (path)<input class="field" id="tlApiEndpoint" type="text" placeholder="/api/inventory/assets" /></label>
+                <label class="tl-api-cs">Client ID<input class="field" id="tlApiClientId" type="text" /></label>
+                <label class="tl-api-cs">Client secret<input class="field" id="tlApiSecret" type="password" /></label>
+                <label class="tl-api-tenant">Tenant (directory) ID<input class="field" id="tlApiTenant" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" /></label>
+                <label class="tl-api-token">API key / token<input class="field" id="tlApiKey" type="password" /></label>
+                <label class="tl-api-userpass">Username<input class="field" id="tlApiUser" type="text" /></label>
+                <label class="tl-api-userpass">Password<input class="field" id="tlApiPass" type="password" /></label>
+                <label class="tl-api-keys">Access key<input class="field" id="tlApiAccess" type="text" /></label>
+                <label class="tl-api-keys">Secret key<input class="field" id="tlApiSKey" type="password" /></label>
+                <label class="full tl-api-search">SPL search<input class="field" id="tlApiSearch" type="text" placeholder="search index=* earliest=-24h | stats count by host" /></label>
+                <label class="tl-api-custom">Assets field path<input class="field" id="tlApiPath" type="text" placeholder="resources (dot-path in JSON)" /></label>
+                <label class="tl-api-verify checkbox"><input id="tlApiVerify" type="checkbox" /> Verify TLS certificate</label>
+              </div>
+              <button class="btn primary" id="tlApiConnect" type="button" style="margin-top:12px;">Connect &amp; sync</button>
+            </div>
+
+            <div class="hint">
+              API integrations resync automatically once a day — or hit "sync" on any list to pull the latest versions now.
+            </div>
+          </div>
+
+          <!-- bookmarks + webhook -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Bookmarked stack</h3>
+              <span class="card-sub">You'll get a Slack webhook when a new advisory matches these</span>
+            </div>
+            <div class="bm-chips" id="tlBookmarks"></div>
+            <div class="add-row">
+              <input class="field" id="tlBmInput" type="text" placeholder="e.g. nginx, postgresql, wordpress, apache…" />
+              <button class="btn primary" id="tlBmAdd" type="button">Add bookmark</button>
+            </div>
+            <div class="webhook" id="tlWebhook" style="margin-top:16px;">
+              <span class="wh-dot"></span>
+              <span class="wh-txt">Checking webhook status…</span>
+              <button class="btn ghost icon-btn btn-sm" id="tlTestBtn" type="button" style="margin-left:auto;">Send test</button>
+            </div>
+          </div>
+
+          <!-- settings -->
+          <div class="card">
+            <div class="card-head">
+              <h3>Settings</h3>
+              <span class="card-sub">Configure your Slack webhook to receive advisory notifications</span>
+            </div>
+            <label class="field-label" for="tlSlackUrl">Slack Incoming Webhook URL</label>
+            <div class="add-row">
+              <input class="field" id="tlSlackUrl" type="url" placeholder="https://hooks.slack.com/services/T.../B.../..." />
+              <button class="btn primary" id="tlSaveSettings" type="button">Save</button>
+            </div>
+            <p class="field-hint" id="tlSettingsHint">Paste your <a href="https://api.slack.com/messaging/webhooks" target="_blank" rel="noopener">Slack webhook URL</a>. Leave empty to use the <code>SLACK_WEBHOOK_URL</code> env var.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ VENDOR SOURCES ============================ -->
+  <section class="sources-section">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Aggregated sources</span>
+        <h2>One feed, every major source</h2>
+      </div>
+      <div class="source-grid">
+        <div class="source-card"><h4>NVD / CVE.org</h4><p>The full CVE dataset with CVSS scores — the authoritative record of disclosed vulnerabilities.</p></div>
+        <div class="source-card"><h4>CISA KEV</h4><p>The Known Exploited Vulnerabilities catalog — CVEs actively exploited in the wild, flagged as such.</p></div>
+        <div class="source-card"><h4>GitHub Security Advisories</h4><p>Ecosystem advisories (npm, PyPI, Maven, Go, Rust) with severity and affected packages.</p></div>
+        <div class="source-card"><h4>Ubuntu USN</h4><p>Canonical's security notices mapping CVEs to Ubuntu packages and fixes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ FOOTER ============================ -->
+  <footer>
+    <div class="container">
+      <p>ThreatLens is open source under the MIT License.</p>
+      <p><a href="https://github.com/mnbysec/threatlens">GitHub</a></p>
+    </div>
+  </footer>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>
